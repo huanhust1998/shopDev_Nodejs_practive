@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const morgan = require('morgan');
 const {default: helmet} = require('helmet');
@@ -10,9 +11,10 @@ app.use(helmet()); // giúp cải thiện tính bảo mật của ứng dụng w
 app.use(compression()); // compression được sử dụng để nén dữ liệu trước khi gửi cho client, giúp giảm kịch thước của dữ liệu truyền tải qua mạng, giúp tăng tốc độ truyền tải và tiết kiệm băng thông
 
 // init db
-require("./dbs/init.mongodb");
-const {checkOverLoad} = require('./helper/check.connect');
-checkOverLoad();
+//require("./dbs/init.mongodb");
+require("./dbs/init.mongodb.lv0");
+//const {checkOverLoad} = require('./helper/check.connect');
+//checkOverLoad();
 
 // int routes
 app.get('/', (req, res, next)=>{

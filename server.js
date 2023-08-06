@@ -1,8 +1,8 @@
 const app = require("./src/app");
-const PORT = 3055;
+const PORT = process.env.PORT || 3056;
 
 const server = app.listen(PORT, ()=>{
-    console.log("eCommerce start with port ",3055);
+    console.log("eCommerce start with port ", PORT);
 });
 
 // process.on("SIGINT", ()=>{
