@@ -10,14 +10,16 @@ app.use(helmet()); // giúp cải thiện tính bảo mật của ứng dụng w
 app.use(compression()); // compression được sử dụng để nén dữ liệu trước khi gửi cho client, giúp giảm kịch thước của dữ liệu truyền tải qua mạng, giúp tăng tốc độ truyền tải và tiết kiệm băng thông
 
 // init db
-
+require("./dbs/init.mongodb");
+const {checkOverLoad} = require('./helper/check.connect');
+checkOverLoad();
 
 // int routes
 app.get('/', (req, res, next)=>{
     const strCompress = "Hello World";
     return res.status(200).json({
         message: 'Welcome',
-        metadata: strCompress.repeat(10000)
+        // metadata: strCompress.repeat(10000)
     })
 })
 // handling error 
