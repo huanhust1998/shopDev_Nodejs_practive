@@ -10,7 +10,6 @@ const connectString = `mongodb://${host}:${port}/${name}`;
 
 //const connectString = `mongodb://127.0.0.1:27017/shopDEV`;
 
-console.log(connectString)
 
 mongoose
   .connect(connectString)
