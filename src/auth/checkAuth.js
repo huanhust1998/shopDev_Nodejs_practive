@@ -52,7 +52,7 @@ const asyncHandler = (fn) => {
   };
 };
 
-module.exports = {
+module.exports = { 
   apiKey,
   permission,
   asyncHandler
