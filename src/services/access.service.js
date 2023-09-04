@@ -5,11 +5,13 @@ const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const KeyTokenService = require("./keyToken.service");
 const { createTokenPair } = require("../auth/authUtils");
-const { getInfoData } = require("../utils");
+const { getInfoData, createPublicPrivateKey } = require("../utils");
 const {
   BadRequestError,
   ConflictRequestError,
+  AuthFailureError,
 } = require("../core/error.response");
+const { findByEmail } = require("./shop.service");
 const RoleShop = {
   SHOP: "SHOP",
   WRITE: "WRITE",
@@ -18,8 +20,48 @@ const RoleShop = {
 };
 
 class AccessService {
+  /**
+   * 1- Check email in dbs
+   * 2- Match password
+   * 3- Create AT vs RT and Save
+   * 4- Generate tokens
+   * 5- Get data return login
+   */
+  static login = async ({ email, password, refreshToken = null }) => {
+    //1
+    const foundShop = await findByEmail({ email });
+    if (!foundShop) throw new BadRequestError("Shop not registered");
+
+    //2
+    const match = bcrypt.compare(password, foundShop.password);
+    if (!match) throw new AuthFailureError("Authentication Error");
+
+    //3
+    const { privateKey, publicKey } = createPublicPrivateKey();
+
+    //4
+    const tokens = await createTokenPair(
+      { userId: shop._id, email },
+      publicKey,
+      privateKey
+    );
+
+    await KeyTokenService.createKeyToken({
+      refreshToken: tokens.refreshToken,
+      privateKey,
+      publicKey,
+    });
+
+    return {
+      shop: getInfoData({
+        fields: ["_id", "name", "email"],
+        object: newShop,
+      }),
+      tokens,
+    };
+  };
+
   static signUp = async ({ name, email, password }) => {
-    //step1: check email exists?
     const holderShop = await shopModel.findOne({ email }).lean();
     if (holderShop) {
       throw new BadRequestError("Error: Shop already registered");
@@ -34,17 +76,7 @@ class AccessService {
     });
 
     if (newShop) {
-      const { privateKey, publicKey } = crypto.generateKeyPairSync("rsa", {
-        modulusLength: 4096,
-        publicKeyEncoding: {
-          type: "pkcs1",
-          format: "pem",
-        },
-        privateKeyEncoding: {
-          type: "pkcs1",
-          format: "pem",
-        },
-      });
+      const { privateKey, publicKey } = createPublicPrivateKey();
       const publicKeyString = await KeyTokenService.createKeyToken({
         userId: newShop._id,
         publicKey,
