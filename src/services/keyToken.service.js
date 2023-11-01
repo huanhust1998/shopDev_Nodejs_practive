@@ -29,7 +29,7 @@ class KeyTokenService {
       const filter = { user: userId },
         update = { publicKey, privateKey, refreshTokensUsed: [], refreshToken },
         options = { upsert: true, new: true };
-      const tokens = await keyTokenModel.findOneAndDelete(
+      const tokens = await keyTokenModel.findOneAndUpdate(
         filter,
         update,
         options

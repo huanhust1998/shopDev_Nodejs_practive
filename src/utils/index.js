@@ -1,6 +1,6 @@
 "use strict";
 
-const crypto = require("crypto");
+const {generateKeyPairSync} = require("node:crypto");
 const _ = require("lodash");
 
 const getInfoData = ({ fields = [], object = {} }) => {
@@ -8,8 +8,17 @@ const getInfoData = ({ fields = [], object = {} }) => {
 };
 
 const createPublicPrivateKey = () => {
-  const privateKey = crypto.randomBytes(64).toString("hex");
-  const publicKey = crypto.randomBytes(64).toString("hex");
+  const { privateKey, publicKey } = generateKeyPairSync("rsa", {
+    modulusLength: 2048,
+    publicKeyEncoding: {
+      type: "pkcs1",
+      format: "pem",
+    },
+    privateKeyEncoding: {
+      type: "pkcs1",
+      format: "pem",
+    },
+  });
   return{ privateKey, publicKey};
 };
 
