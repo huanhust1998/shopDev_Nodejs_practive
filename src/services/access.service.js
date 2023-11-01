@@ -46,7 +46,7 @@ class AccessService {
 
     //4
     const tokens = await createTokenPair(
-      { userId: shop._id, email },
+      { userId: foundShop._id, email },
       publicKey,
       privateKey
     );
@@ -60,7 +60,7 @@ class AccessService {
     return {
       shop: getInfoData({
         fields: ["_id", "name", "email"],
-        object: newShop,
+        object: foundShop,
       }),
       tokens,
     };

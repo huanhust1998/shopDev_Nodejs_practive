@@ -13,8 +13,8 @@ class AccessController {
 
   login = async (req, res, next) => {
     new SuccessResponse({
-      metadata: await AccessService.login(res.body),
-    });
+      metadata: await AccessService.login(req.body),
+    }).send(res);
   };
 
   signUp = async (req, res, next) => {
