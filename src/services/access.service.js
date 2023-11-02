@@ -45,8 +45,10 @@ class AccessService {
     const { privateKey, publicKey } = createPublicPrivateKey();
 
     //4
+
+    const { _id: userId } = foundShop;
     const tokens = await createTokenPair(
-      { userId: foundShop._id, email },
+      { userId, email },
       publicKey,
       privateKey
     );
@@ -55,6 +57,7 @@ class AccessService {
       refreshToken: tokens.refreshToken,
       privateKey,
       publicKey,
+      userId,
     });
 
     return {
