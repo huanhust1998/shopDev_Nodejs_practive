@@ -26,11 +26,13 @@ class AccessService {
   static handleRefreshToken = async ({ refreshToken, user, keyStore }) => {
     const { userId, email } = user;
 
+    // trường hợp refresh token gửi lên đã nằm trong refreshTokensUSed của keyStore thì xóa hết
     if (keyStore.refreshTokensUsed.includes(refreshToken)) {
       await KeyTokenService.deleteKeyById(userId);
       throw new ForbiddenError("Something wrong happen !! Plz re_login");
     }
 
+    // trường hợp refreshToken gửi lên khác với refreshToken trong keyStore thì chứng tỏ user chưa đăng ký
     if (keyStore.refreshToken !== refreshToken)
       throw new AuthFailureError("Shop isn't registered");
 

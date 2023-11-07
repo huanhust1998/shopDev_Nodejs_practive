@@ -44,6 +44,7 @@ const authentication = asyncHandler(async (req, res, next) => {
   const keyStore = await findByUserId(userId);
   if (!keyStore) throw new NotFoundError("Not found keyStore");
 
+  //trong trường hợp accessToken hết hạn thì refreshToken sẽ được gửi lên
   const refreshToken = req.headers[HEADER.REFRESH_TOKEN];
 
   if(refreshToken){
