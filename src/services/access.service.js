@@ -24,7 +24,6 @@ class AccessService {
    * checked this token used
    */
   static handleRefreshToken = async (refreshToken) => {
-    console.log("handleRefreshToken: ", refreshToken)
     //check xem token này đã được sử dụng chưa
     const foundToken = await KeyTokenService.findByRefreshTokenUsed(
       refreshToken
