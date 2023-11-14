@@ -39,6 +39,7 @@ const electronicSchema = new Schema(
     brand: { type: String, require: true },
     size: String,
     material: String,
+    product_shop: { type: Schema.Types.ObjectId, ref: "Shop" },
   },
   {
     collection: "electronics",
