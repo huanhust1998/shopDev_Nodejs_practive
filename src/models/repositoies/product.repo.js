@@ -1,5 +1,6 @@
 "use strict";
 
+const { getSelectData } = require("../../utils");
 const {
   product,
   clothing,
@@ -71,10 +72,24 @@ const unpublishProductByShopRepo = async ({ product_shop, product_id }) => {
   return modifiedCount;
 };
 
+const fillAllProductsRepo = async ({ limit, sort, page, filter, select }) => {
+  const skip = (page - 1) * limit;
+  const sortBy = sort === "ctime" ? { _id: -1 } : { _is: 1 };
+  const products = await product
+    .find(filter)
+    .sort(sortBy)
+    .skip(skip)
+    .limit(limit)
+    .select(getSelectData(select))
+    .lean();
+    return products;
+};
+
 module.exports = {
   findAllDraftsForShopRepo,
   publishProductByShopRepo,
   findAllPublishForShopRepo,
   unpublishProductByShopRepo,
-  searchProductByUserRepo
+  searchProductByUserRepo,
+  fillAllProductsRepo
 };

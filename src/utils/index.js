@@ -22,7 +22,12 @@ const createPublicPrivateKey = () => {
   return{ privateKey, publicKey};
 };
 
+const getSelectData = (select = []) => {
+  return Object.fromEntries(select.map((el) => [el, 1]));
+};
+
 module.exports = {
   getInfoData,
-  createPublicPrivateKey
+  createPublicPrivateKey,
+  getSelectData
 };
