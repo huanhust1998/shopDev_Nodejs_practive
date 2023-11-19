@@ -8,6 +8,7 @@ const router = express.Router();
 
 router.get("/search/:keySearch", asyncHandler(productController.getListSearchProduct))
 router.get("/", asyncHandler(productController.getAllProducts))
+router.get("/:product_id", asyncHandler(productController.getOneProduct))
 
 router.use(authentication);
 router.post("", asyncHandler(productController.createProduct));

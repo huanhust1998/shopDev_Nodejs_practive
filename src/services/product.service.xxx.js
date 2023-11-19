@@ -8,7 +8,7 @@ const {
 } = require("../models/product.model");
 const { BadRequestError } = require("../core/error.response");
 const {
-  findAllDraftsForShopRepo, findAllPublishForShopRepo, publishProductByShopRepo, unpublishProductByShopRepo, searchProductByUserRepo, fillAllProductsRepo,
+  findAllDraftsForShopRepo, findAllPublishForShopRepo, publishProductByShopRepo, unpublishProductByShopRepo, searchProductByUserRepo, fillAllProductsRepo, fillOneProductRepo,
 } = require("../models/repositoies/product.repo");
 
 //define Factory class to create product
@@ -73,7 +73,12 @@ class ProductFactory {
     });
   }
 
-  static async findProduct() {}
+  static async findOneProduct({product_id}) {
+    return await fillOneProductRepo({
+      product_id,
+      unSelect: ["isDraft, isPublished", "createdAt", "updatedAt", "__v"],
+    });
+  }
 }
 
 //define base product class
