@@ -3,24 +3,29 @@ const ProductServiceV2 = require("../services/product.service.xxx");
 const {SuccessResponse} = require("../core/success.response");
 
 class ProductController {
-  // createProduct = async (req, res, next) => {
-  //   new SuccessResponse({
-  //     message: "Create new Product success",
-  //     metadata: await ProductService.createProduct(
-  //       req.body.product_type,
-  //       {
-  //         ...req.body,
-  //         product_shop: req.user.userId
-  //       }
-  //     ),
-  //   }).send(res);
   createProduct = async (req, res, next) => {
     new SuccessResponse({
       message: "Create new Product success",
-      metadata: await ProductServiceV2.createProduct(req.body.product_type, {
-        ...req.body,
-        product_shop: req.user.userId,
-      }),
+      metadata: await ProductServiceV2.createProductFactory(
+        req.body.product_type,
+        {
+          ...req.body,
+          product_shop: req.user.userId,
+        }
+      ),
+    }).send(res);
+  };
+
+  updateProduct = async (req, res, next) => {
+    new SuccessResponse({
+      message: "Create new Product success",
+      metadata: await ProductServiceV2.updateProductFactory(
+        req.body.product_type, req.params.productId,
+        {
+          ...req.body,
+          product_shop: req.user.userId,
+        }
+      ),
     }).send(res);
   };
 
@@ -81,7 +86,7 @@ class ProductController {
     new SuccessResponse({
       message: "Get product success",
       metadata: await ProductServiceV2.findOneProduct({
-        product_id: req.params.product_id
+        product_id: req.params.product_id,
       }),
     }).send(res);
   };

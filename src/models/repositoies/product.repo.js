@@ -92,6 +92,16 @@ const fillOneProductRepo = async ({ product_id, unSelect }) => {
   return foundProduct;
 };
 
+const updateProductByIdRepo = async ({
+  model,
+  productId,
+  payload,
+  isNew = true,
+}) => {
+  const productUpdate = await model.findByIdAndUpdate(productId, payload, { new: isNew });
+  return productUpdate;
+};
+
 module.exports = {
   findAllDraftsForShopRepo,
   publishProductByShopRepo,
@@ -99,5 +109,6 @@ module.exports = {
   unpublishProductByShopRepo,
   searchProductByUserRepo,
   fillAllProductsRepo,
-  fillOneProductRepo
+  fillOneProductRepo,
+  updateProductByIdRepo
 };
