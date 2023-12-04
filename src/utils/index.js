@@ -2,6 +2,9 @@
 
 const { generateKeyPairSync } = require("node:crypto");
 const _ = require("lodash");
+const { Types } = require("mongoose");
+
+const convertToObjectIdMongoDb = (id) => Types.ObjectId(id);
 
 const getInfoData = ({ fields = [], object = {} }) => {
   return _.pick(object, fields);
@@ -60,4 +63,5 @@ module.exports = {
   unGetSelectData,
   removeUndefinedObject,
   updateNestedObjectParser,
+  convertToObjectIdMongoDb
 };
