@@ -48,9 +48,7 @@ class DiscountService {
     if (new Date(start_date) > new Date(end_date)) {
       throw new BadRequestError("Start date must not be after end date!");
     }
-    console.log("shopId: ", shopId)
-
-    //create index for discount code
+   
     const foundDiscount = await discountModel
       .findOne({
         discount_code: code,
@@ -103,7 +101,8 @@ class DiscountService {
     const foundDiscount = await discountModel
       .findOne({
         discount_code: code,
-        discount_shopId: convertToObjectIdMongoDb(shopId),
+        //discount_shopId: convertToObjectIdMongoDb(shopId),
+        discount_shopId: shopId
       })
       .lean();
 
@@ -179,6 +178,9 @@ class DiscountService {
       discount_start_date,
       discount_type,
       discount_value,
+      discount_min_order_value,
+      discount_max_uses_per_user,
+      discount_users_used
     } = foundDiscount;
     if (!discount_is_active) throw new NotFoundError(`Discount expired!`);
     if (!discount_max_uses) throw new NotFoundError(`Discount are out!`);

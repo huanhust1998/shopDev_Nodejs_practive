@@ -19,7 +19,7 @@ class DiscountController {
         ...req.query,
         shopId: req.user.userId,
       }),
-    });
+    }).send(res);
   };
 
   getDiscountAmount = async (req, res, next) => {
@@ -28,16 +28,16 @@ class DiscountController {
       metadata: await DiscountService.getDiscountAmount({
         ...req.body,
       }),
-    });
+    }).send(res);
   };
 
   getAllDiscountCodesWithProducts = async (req, res, next) => {
     new SuccessResponse({
       message: "Successful code found",
       metadata: await DiscountService.getAllDiscountCodesWithProduct({
-        ...req.body,
+        ...req.query,
       }),
-    });
+    }).send(res);
   };
 }
 
