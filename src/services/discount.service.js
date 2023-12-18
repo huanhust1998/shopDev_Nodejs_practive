@@ -4,6 +4,7 @@ const { BadRequestError, NotFoundError } = require("../core/error.response");
 const discountModel = require("../models/discount.model");
 const {
   findAllDiscountCodesUnSelect,
+  checkDiscountExists,
 } = require("../models/repositoies/discount.repo");
 const { fillAllProductsRepo } = require("../models/repositoies/product.repo");
 const { convertToObjectIdMongoDb } = require("../utils");
@@ -47,12 +48,14 @@ class DiscountService {
     if (new Date(start_date) > new Date(end_date)) {
       throw new BadRequestError("Start date must not be after end date!");
     }
+    console.log("shopId: ", shopId)
 
     //create index for discount code
     const foundDiscount = await discountModel
       .findOne({
         discount_code: code,
-        discount_shopId: convertToObjectIdMongoDb(shopId),
+        //discount_shopId: convertToObjectIdMongoDb(shopId),
+        discount_shopId: shopId,
       })
       .lean();
 
@@ -62,7 +65,7 @@ class DiscountService {
 
     const newDiscount = await discountModel.create({
       discount_name: name,
-      discount_applies_to: applies_to === "all" ? [] : product_ids,
+      discount_applies_to: applies_to,
       discount_code: code,
       discount_description: description,
       discount_end_date: new Date(end_date),
@@ -70,7 +73,7 @@ class DiscountService {
       discount_max_uses: max_uses,
       discount_max_uses_per_user: max_uses_per_user,
       discount_min_order_value: min_order_value || 0,
-      discount_product_ids: product_ids,
+      discount_product_ids: applies_to === "all" ? [] : product_ids,
       discount_start_date: new Date(start_date),
       discount_type: type,
       discount_uses_count: uses_count,
@@ -157,4 +160,97 @@ class DiscountService {
     });
     return discounts;
   }
+
+  /**
+   * Apply discount code
+   */
+
+  static async getDiscountAmount({ codeId, userId, shopId, products }) {
+    const foundDiscount = await checkDiscountExists(discountModel, {
+      discount_code: codeId,
+      discount_shopId: shopId,
+    });
+
+    if (!foundDiscount) throw new NotFoundError(`Discount  doesn't exits`);
+    const {
+      discount_is_active,
+      discount_max_uses,
+      discount_end_date,
+      discount_start_date,
+      discount_type,
+      discount_value,
+    } = foundDiscount;
+    if (!discount_is_active) throw new NotFoundError(`Discount expired!`);
+    if (!discount_max_uses) throw new NotFoundError(`Discount are out!`);
+    if (
+      new Date() < new Date(discount_start_date) ||
+      new Date() > new Date(discount_end_date)
+    ) {
+      throw new NotFoundError(`Discount expired!`);
+    }
+
+    let totalOrder;
+    if (discount_min_order_value > 0) {
+      totalOrder = products.reduce((acc, product) => {
+        return acc + product.quantity * product.price;
+      }, 0);
+      if (totalOrder < discount_min_order_value) {
+        throw new NotFoundError(
+          `Discount  requires a minium order value of ${discount_min_order_value}`
+        );
+      }
+    }
+
+    if (discount_max_uses_per_user > 0) {
+      const userUserDiscount = discount_users_used.find(
+        (user) => user.userId === userId
+      );
+      if (userUserDiscount) {
+      }
+    }
+
+    const amount =
+      discount_type === "fixed_amount"
+        ? discount_value
+        : totalOrder * (discount_value / 100);
+
+    return {
+      totalOrder,
+      discount: amount,
+      totalPrice: totalOrder - amount,
+    };
+  }
+
+  // delete discount code
+  static async deleteDiscountCode({shopId, codeId}){
+    const deleted = await discountModel.findOneAndDelete({
+      discount_code: codeId,
+      discount_shopId: shopId
+    })
+    return deleted
+  }
+
+  static async cancelDiscountCode({shopId, codeId, userId}){
+    const foundDiscount = await checkDiscountExists(discountModel,{
+      discount_code: codeId,
+      discount_shopId: convertToObjectIdMongoDb(shopId)
+    })
+
+    if(!foundDiscount) throw new NotFoundError(`Discount expired!`)
+
+    const result = await discountModel.findByIdAndUpdate(foundDiscount._id, {
+      $pull: {
+        discount_users_used: userId,
+      },
+      $inc:{
+        discount_max_uses: 1,
+        discount_user_count: -1
+      }
+    })
+
+    return result
+
+  }
 }
+
+module.exports = DiscountService
