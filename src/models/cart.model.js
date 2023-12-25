@@ -1,4 +1,4 @@
-const { model, Schema } = require("module");
+const { model, Schema } = require("mongoose");
 
 const DOCUMENT_NAME = "Cart";
 const COLLECTION_NAME = "Carts";
@@ -28,7 +28,7 @@ const cartSchema = new Schema(
   },
   {
     collection: COLLECTION_NAME,
-    timeseries: {
+    timestamps: {
       createAt: "createOn",
       updateAt: "modifiedOn",
     },

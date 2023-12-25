@@ -1,6 +1,10 @@
 "use strict";
 
-const { getSelectData, unGetSelectData } = require("../../utils");
+const {
+  getSelectData,
+  unGetSelectData,
+  convertToObjectIdMongoDb,
+} = require("../../utils");
 const {
   product,
   clothing,
@@ -82,7 +86,7 @@ const fillAllProductsRepo = async ({ limit, sort, page, filter, select }) => {
     .limit(limit)
     .select(getSelectData(select))
     .lean();
-    return products;
+  return products;
 };
 
 const fillOneProductRepo = async ({ product_id, unSelect }) => {
@@ -98,8 +102,15 @@ const updateProductByIdRepo = async ({
   payload,
   isNew = true,
 }) => {
-  const productUpdate = await model.findByIdAndUpdate(productId, payload, { new: isNew });
+  const productUpdate = await model.findByIdAndUpdate(productId, payload, {
+    new: isNew,
+  });
   return productUpdate;
+};
+
+const getProductByIdRepo = async (productId) => {
+  // return await product.findOne({ _id: convertToObjectIdMongoDb(productId) }).lean();
+  return await product.findOne({ _id: productId }).lean();
 };
 
 module.exports = {
@@ -110,5 +121,6 @@ module.exports = {
   searchProductByUserRepo,
   fillAllProductsRepo,
   fillOneProductRepo,
-  updateProductByIdRepo
+  updateProductByIdRepo,
+  getProductByIdRepo,
 };

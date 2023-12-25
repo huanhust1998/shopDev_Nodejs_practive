@@ -1,6 +1,8 @@
 "use strict";
 
 const { cart } = require("../models/cart.model");
+const { getProductByIdRepo } = require("../models/repositoies/product.repo");
+const { NotFoundError } = require("../core/error.response");
 
 class CartService {
   static async createUserCart({ userId, product }) {
@@ -19,7 +21,7 @@ class CartService {
     const query = {
         cart_userId: userId,
         "cart_products.productId": productId,
-        cart_state: "action",
+        cart_state: "active",
       },
       updateSet = {
         $inc: {
@@ -27,6 +29,7 @@ class CartService {
         },
       },
       options = { upsert: true, new: true };
+    console.log({ userId, product });
     return await cart.findOneAndUpdate(query, updateSet, options);
   }
 
@@ -44,6 +47,45 @@ class CartService {
 
     //giỏ hàng tồn tại, và có sản phẩm này thì update quantity
     return await CartService.updateUserCartQuantity({ userId, product });
+  }
+
+  static async deleteUserCart({ userId, productId }) {
+    const query = { cart_userId: userId, cart_state: "active" };
+    const updateSet = {
+      $pull: {
+        cart_products: { productId },
+      },
+    };
+    const deleteCart = await cart.updateOne(query, updateSet);
+    return deleteCart;
+  }
+
+  static async getListUserCart({ userId }) {
+    return await cart
+      .findOne({
+        cart_userId: +userId,
+      })
+      .lean();
+  }
+
+  //update cart
+  static async addToCardV2({ userId, shop_order_ids = {} }) {
+    const { productId, quantity, old_quantity } =
+      shop_order_ids[0]?.item_products[0];
+    //check product
+    const foundProduct = await getProductByIdRepo(productId);
+    if (!foundProduct) throw new NotFoundError("");
+    if (foundProduct.product_shop.toString() !== shop_order_ids[0].shopId)
+      throw new NotFoundError("");
+    if (quantity === 0) {
+    }
+    return await CartService.updateUserCartQuantity({
+      userId,
+      product: {
+        productId,
+        quantity: quantity - old_quantity,
+      },
+    });
   }
 }
 
